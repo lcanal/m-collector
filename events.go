@@ -10,11 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-type NewDeployment struct {
-	ID           int     `json:"id"`
-	DateDeployed float64 `json:"deployed"`
-}
-
 //InitDynamoConnection initializes dynamo connection.
 func InitDynamoConnection() {
 	DynamoSession = dynamodb.New(session.New())

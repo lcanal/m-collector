@@ -1,4 +1,4 @@
-module github.com/lcanal/m-collector
+module github.com/lcanal/mcollector
 
 require (
 	github.com/aws/aws-lambda-go v1.2.0

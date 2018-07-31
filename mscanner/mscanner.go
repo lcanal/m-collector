@@ -6,5 +6,5 @@ import (
 
 //ScanModules scan the node_modules directory
 func ScanModules() {
-	log.Fatalf("ERR!!!!!!!!!!!!")
+	log.Printf("ERR!!!!!!!!!!!!")
 }

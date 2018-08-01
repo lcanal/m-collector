@@ -29,18 +29,18 @@ func CreateDynamoTable() error {
 				AttributeName: aws.String("ModuleName"),
 				AttributeType: aws.String("S"),
 			},
-			{
-				AttributeName: aws.String("ModuleVersion"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("ModuleDescription"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("ModuleHomepage"),
-				AttributeType: aws.String("S"),
-			},
+			// {
+			// 	AttributeName: aws.String("ModuleVersion"),
+			// 	AttributeType: aws.String("S"),
+			// },
+			// {
+			// 	AttributeName: aws.String("ModuleDescription"),
+			// 	AttributeType: aws.String("S"),
+			// },
+			// {
+			// 	AttributeName: aws.String("ModuleHomepage"),
+			// 	AttributeType: aws.String("S"),
+			// },
 		},
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
@@ -51,18 +51,18 @@ func CreateDynamoTable() error {
 				AttributeName: aws.String("ModuleName"),
 				KeyType:       aws.String("RANGE"),
 			},
-			{
-				AttributeName: aws.String("ModuleVersion"),
-				KeyType:       aws.String("RANGE"),
-			},
-			{
-				AttributeName: aws.String("ModuleDescription"),
-				KeyType:       aws.String("RANGE"),
-			},
-			{
-				AttributeName: aws.String("ModuleHomepage"),
-				KeyType:       aws.String("RANGE"),
-			},
+			// {
+			// 	AttributeName: aws.String("ModuleVersion"),
+			// 	KeyType:       aws.String("RANGE"),
+			// },
+			// {
+			// 	AttributeName: aws.String("ModuleDescription"),
+			// 	KeyType:       aws.String("RANGE"),
+			// },
+			// {
+			// 	AttributeName: aws.String("ModuleHomepage"),
+			// 	KeyType:       aws.String("RANGE"),
+			// },
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  aws.Int64(5),
@@ -106,6 +106,9 @@ func WriteDynamoItem(nae NewAppEntry) {
 			},
 			"ModuleName": {
 				S: aws.String(nae.ModulesUsed[0].Name),
+			},
+			"ModuleVersion": {
+				S: aws.String(nae.ModulesUsed[0].Version),
 			},
 		},
 		ReturnConsumedCapacity: aws.String("TOTAL"),

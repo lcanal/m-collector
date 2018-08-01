@@ -43,12 +43,13 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 }
 
 func main() {
-	log.Printf("Go on take everything!!")
+	log.Printf("Starting up mcollector lambda")
 	//Init db connection and check if table exists
 	InitDynamoConnection()
 	err := CreateDynamoTable()
 	if err != nil {
 		log.Printf("Error: %e", err)
 	}
+
 	lambda.Start(Handler)
 }

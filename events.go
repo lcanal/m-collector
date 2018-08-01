@@ -22,21 +22,21 @@ func CreateDynamoTable() error {
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
-				AttributeName: aws.String("AppName"),
+				AttributeName: aws.String("ModuleName"),
 				AttributeType: aws.String("S"),
 			},
 			{
-				AttributeName: aws.String("ModuleName"),
+				AttributeName: aws.String("UsedInApp"),
 				AttributeType: aws.String("S"),
 			},
 		},
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
-				AttributeName: aws.String("AppName"),
+				AttributeName: aws.String("ModuleName"),
 				KeyType:       aws.String("HASH"),
 			},
 			{
-				AttributeName: aws.String("ModuleName"),
+				AttributeName: aws.String("UsedInApp"),
 				KeyType:       aws.String("RANGE"),
 			},
 		},
@@ -77,16 +77,18 @@ func WriteDynamoItem(nae NewAppEntry) {
 	BatchSize := 20
 	var writeRequests []*dynamodb.WriteRequest
 
+	checkEmpties(&nae)
+
 	//Batch limit is 400kb or 25 items. Using 20 by default
 	for index := 0; index < len(nae.ModulesUsed); index++ {
 		moduleEntry := nae.ModulesUsed[index]
 		newPutRequest := &dynamodb.PutRequest{
 			Item: map[string]*dynamodb.AttributeValue{
-				"AppName": {
-					S: aws.String(nae.AppName),
-				},
 				"ModuleName": {
 					S: aws.String(moduleEntry.Name),
+				},
+				"UsedInApp": {
+					S: aws.String(nae.AppName),
 				},
 				"ModuleVersion": {
 					S: aws.String(moduleEntry.Version),
@@ -120,15 +122,34 @@ func WriteDynamoItem(nae NewAppEntry) {
 	return
 }
 
-func sendDynamoItems(itemsInput *dynamodb.BatchWriteItemInput) {
-	result, err := DynamoSession.BatchWriteItem(itemsInput)
-	if err != nil {
-		log.Printf("Error writing batch items: {%v}\n%v\n", itemsInput, err.Error())
-		return
+func checkEmpties(n *NewAppEntry) {
+	//check empty values and give them happy defaults
+	for idx, module := range n.ModulesUsed {
+		if len(module.Description) == 0 {
+			n.ModulesUsed[idx].Description = "No description listed"
+		}
+		if len(module.Homepage) == 0 {
+			n.ModulesUsed[idx].Homepage = "No homepage listed"
+		}
 	}
-	//figureout good retry method
-	// if len(result.UnproccesedItems) >= 0 {
-	// 	log.Println(result.GoString())
-	// }
-	log.Println(result.GoString())
+}
+
+func sendDynamoItems(itemsInput *dynamodb.BatchWriteItemInput) {
+	_, err := DynamoSession.BatchWriteItem(itemsInput)
+	if err != nil {
+		log.Printf("Error writing batch items: %v\n", err.Error())
+		time.Sleep(3 * time.Second)
+		log.Printf("Retrying..")
+		_, err := DynamoSession.BatchWriteItem(itemsInput)
+		if err != nil {
+			log.Printf("Error writing batch items: %v\n", err.Error())
+			time.Sleep(9 * time.Second)
+			log.Printf("Retrying last time..")
+			_, err := DynamoSession.BatchWriteItem(itemsInput)
+			if err != nil {
+				log.Printf("Could not write batch items. Error: %v\nInput:%v", err.Error(), itemsInput)
+			}
+		}
+	}
+	return
 }

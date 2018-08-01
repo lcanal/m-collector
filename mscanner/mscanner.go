@@ -44,15 +44,3 @@ func ScanModules() []PackageEntry {
 
 	return packageentries
 }
-
-func SendToRecord(p []PackageEntry) {
-	log.Printf("Heres what i got \n")
-	json, err := json.Marshal(p)
-
-	if err != nil {
-		log.Printf("Error marshalling: %v", err)
-		return
-	}
-
-	print(string(json))
-}

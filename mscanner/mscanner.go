@@ -25,7 +25,6 @@ func ScanModules() []PackageEntry {
 		log.Fatal(err)
 	}
 	for _, dir := range dirs {
-		log.Println(dir.Name())
 		packagefilepath := nodemodulesdir + "/" + dir.Name() + "/" + packagefilename
 		file, e := ioutil.ReadFile(packagefilepath)
 		if e != nil {

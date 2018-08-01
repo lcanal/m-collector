@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+
+	"github.com/lcanal/mcollector/mmodels"
 )
 
 //InitDynamoConnection initializes dynamo connection.
@@ -72,7 +74,7 @@ func CreateDynamoTable() error {
 }
 
 //WriteDynamoItem writes the item to dynamo
-func WriteDynamoItem(nae NewAppEntry) {
+func WriteDynamoItem(nae mmodels.NewAppEntry) {
 	MainTableName := "ApplicationModules"
 	BatchSize := 20
 	var writeRequests []*dynamodb.WriteRequest
@@ -122,7 +124,7 @@ func WriteDynamoItem(nae NewAppEntry) {
 	return
 }
 
-func checkEmpties(n *NewAppEntry) {
+func checkEmpties(n *mmodels.NewAppEntry) {
 	//check empty values and give them happy defaults
 	for idx, module := range n.ModulesUsed {
 		if len(module.Description) == 0 {

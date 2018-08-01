@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+
+	"github.com/lcanal/mcollector/mmodels"
 )
 
 var (
@@ -17,8 +19,8 @@ func init() {
 }
 
 //ScanModules scan the node_modules directory
-func ScanModules() []PackageEntry {
-	var packageentries []PackageEntry
+func ScanModules() []mmodels.NodeLibrary {
+	var packageentries []mmodels.NodeLibrary
 
 	dirs, err := ioutil.ReadDir(nodemodulesdir)
 	if err != nil {
@@ -31,7 +33,7 @@ func ScanModules() []PackageEntry {
 			log.Printf("File error: %v\n", e)
 		}
 
-		var pe PackageEntry
+		var pe mmodels.NodeLibrary
 		ue := json.Unmarshal(file, &pe)
 		if ue != nil {
 			log.Printf("Error unmarshalling %v\n", ue)

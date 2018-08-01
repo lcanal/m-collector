@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+
+	"github.com/lcanal/mcollector/mmodels"
 )
 
 //DynamoSession main service session to Dynamo
@@ -15,7 +17,7 @@ var DynamoSession *dynamodb.DynamoDB
 //Handler Main lambda entrypoint
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	//Request has lots of context stuff. Just want the body.
-	var entry NewAppEntry
+	var entry mmodels.NewAppEntry
 	err := json.Unmarshal([]byte(request.Body), &entry)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

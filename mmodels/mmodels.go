@@ -1,4 +1,4 @@
-package main
+package mmodels
 
 //NewAppEntry is the main container of the entry
 type NewAppEntry struct {

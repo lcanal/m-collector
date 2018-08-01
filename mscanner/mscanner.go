@@ -39,11 +39,7 @@ func ScanModules() []PackageEntry {
 			continue
 		}
 
-		ae := append(packageentries, pe)
-		if ae != nil {
-			log.Printf("Error appending: %v", ae)
-			continue
-		}
+		packageentries = append(packageentries, pe)
 	}
 
 	return packageentries

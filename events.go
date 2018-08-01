@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -29,18 +28,6 @@ func CreateDynamoTable() error {
 				AttributeName: aws.String("ModuleName"),
 				AttributeType: aws.String("S"),
 			},
-			// {
-			// 	AttributeName: aws.String("ModuleVersion"),
-			// 	AttributeType: aws.String("S"),
-			// },
-			// {
-			// 	AttributeName: aws.String("ModuleDescription"),
-			// 	AttributeType: aws.String("S"),
-			// },
-			// {
-			// 	AttributeName: aws.String("ModuleHomepage"),
-			// 	AttributeType: aws.String("S"),
-			// },
 		},
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
@@ -51,18 +38,6 @@ func CreateDynamoTable() error {
 				AttributeName: aws.String("ModuleName"),
 				KeyType:       aws.String("RANGE"),
 			},
-			// {
-			// 	AttributeName: aws.String("ModuleVersion"),
-			// 	KeyType:       aws.String("RANGE"),
-			// },
-			// {
-			// 	AttributeName: aws.String("ModuleDescription"),
-			// 	KeyType:       aws.String("RANGE"),
-			// },
-			// {
-			// 	AttributeName: aws.String("ModuleHomepage"),
-			// 	KeyType:       aws.String("RANGE"),
-			// },
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  aws.Int64(5),
@@ -98,46 +73,45 @@ func CreateDynamoTable() error {
 //WriteDynamoItem writes the item to dynamo
 func WriteDynamoItem(nae NewAppEntry) {
 	MainTableName := "ApplicationModules"
+	BatchSize := 20
+	var writeRequests []*dynamodb.WriteRequest
 
-	input := &dynamodb.PutItemInput{
-		Item: map[string]*dynamodb.AttributeValue{
-			"AppName": {
-				S: aws.String(nae.AppName),
+	//Batch limit is 400kb or 25 items. Using 20 by default
+	for index := 0; index < len(nae.ModulesUsed); index++ {
+		moduleEntry := nae.ModulesUsed[index]
+		newPutRequest := &dynamodb.PutRequest{
+			Item: map[string]*dynamodb.AttributeValue{
+				"AppName": {
+					S: aws.String(nae.AppName),
+				},
+				"ModuleName": {
+					S: aws.String(moduleEntry.Name),
+				},
 			},
-			"ModuleName": {
-				S: aws.String(nae.ModulesUsed[0].Name),
-			},
-			"ModuleVersion": {
-				S: aws.String(nae.ModulesUsed[0].Version),
-			},
-		},
-		ReturnConsumedCapacity: aws.String("TOTAL"),
-		TableName:              aws.String(MainTableName),
-	}
+		}
+		writeRequests = append(writeRequests, &dynamodb.WriteRequest{
+			PutRequest: newPutRequest,
+		})
 
-	_, err := DynamoSession.PutItem(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case dynamodb.ErrCodeConditionalCheckFailedException:
-				fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
-			case dynamodb.ErrCodeProvisionedThroughputExceededException:
-				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
-			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
-			case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
-				fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
-			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
+		if index%BatchSize == 0 || index == (len(nae.ModulesUsed)-1) {
+			//Time to create full batchwriteiteminput from putrequest arrays
+			input := &dynamodb.BatchWriteItemInput{
+				RequestItems: map[string][]*dynamodb.WriteRequest{
+					MainTableName: writeRequests,
+				},
 			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
+			sendDynamoItems(input)
+			writeRequests = nil
 		}
 	}
-
 	return
+}
+
+func sendDynamoItems(itemsInput *dynamodb.BatchWriteItemInput) {
+	result, err := DynamoSession.BatchWriteItem(itemsInput)
+	if err != nil {
+		log.Printf("Error writing batch items: %v\n", err.Error())
+		return
+	}
+	log.Printf("Success: %s\n", result.GoString())
 }

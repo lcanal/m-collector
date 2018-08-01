@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -87,6 +88,18 @@ func WriteDynamoItem(nae NewAppEntry) {
 				"ModuleName": {
 					S: aws.String(moduleEntry.Name),
 				},
+				"ModuleVersion": {
+					S: aws.String(moduleEntry.Version),
+				},
+				"ModuleDescription": {
+					S: aws.String(moduleEntry.Description),
+				},
+				"ModuleHomepage": {
+					S: aws.String(moduleEntry.Homepage),
+				},
+				"DateAdded": {
+					S: aws.String(time.Now().Format(time.RFC3339)),
+				},
 			},
 		}
 		writeRequests = append(writeRequests, &dynamodb.WriteRequest{
@@ -110,8 +123,12 @@ func WriteDynamoItem(nae NewAppEntry) {
 func sendDynamoItems(itemsInput *dynamodb.BatchWriteItemInput) {
 	result, err := DynamoSession.BatchWriteItem(itemsInput)
 	if err != nil {
-		log.Printf("Error writing batch items: %v\n", err.Error())
+		log.Printf("Error writing batch items: {%v}\n%v\n", itemsInput, err.Error())
 		return
 	}
-	log.Printf("Success: %s\n", result.GoString())
+	//figureout good retry method
+	// if len(result.UnproccesedItems) >= 0 {
+	// 	log.Println(result.GoString())
+	// }
+	log.Println(result.GoString())
 }

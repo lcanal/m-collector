@@ -8,7 +8,8 @@ type NewAppEntry struct {
 
 //NodeLibrary is the main model for node_module entries
 type NodeLibrary struct {
-	Name       string `json:"name"`
-	Version    string `json:"version"`
-	Vulnerable bool   `json:"is_vulnerable"`
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
+	Homepage    string `json:"homepage"`
 }

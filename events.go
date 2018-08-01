@@ -26,7 +26,19 @@ func CreateDynamoTable() error {
 				AttributeType: aws.String("S"),
 			},
 			{
-				AttributeName: aws.String("SongTitle"),
+				AttributeName: aws.String("ModuleName"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("ModuleVersion"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("ModuleDescription"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("ModuleHomepage"),
 				AttributeType: aws.String("S"),
 			},
 		},
@@ -36,7 +48,19 @@ func CreateDynamoTable() error {
 				KeyType:       aws.String("HASH"),
 			},
 			{
-				AttributeName: aws.String("SongTitle"),
+				AttributeName: aws.String("ModuleName"),
+				KeyType:       aws.String("RANGE"),
+			},
+			{
+				AttributeName: aws.String("ModuleVersion"),
+				KeyType:       aws.String("RANGE"),
+			},
+			{
+				AttributeName: aws.String("ModuleDescription"),
+				KeyType:       aws.String("RANGE"),
+			},
+			{
+				AttributeName: aws.String("ModuleHomepage"),
 				KeyType:       aws.String("RANGE"),
 			},
 		},
@@ -80,8 +104,8 @@ func WriteDynamoItem(nae NewAppEntry) {
 			"AppName": {
 				S: aws.String(nae.AppName),
 			},
-			"SongTitle": {
-				S: aws.String("Call Me Today"),
+			"ModuleName": {
+				S: aws.String(nae.ModulesUsed[0].Name),
 			},
 		},
 		ReturnConsumedCapacity: aws.String("TOTAL"),

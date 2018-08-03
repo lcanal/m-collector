@@ -106,12 +106,12 @@ func WriteDynamoItem(nae mmodels.NewAppEntry) {
 				},
 			},
 		}
+
 		writeRequests = append(writeRequests, &dynamodb.WriteRequest{
 			PutRequest: newPutRequest,
 		})
 
 		if index%BatchSize == 0 || index == (len(nae.ModulesUsed)-1) {
-			//Time to create full batchwriteiteminput from putrequest arrays
 			input := &dynamodb.BatchWriteItemInput{
 				RequestItems: map[string][]*dynamodb.WriteRequest{
 					MainTableName: writeRequests,
@@ -125,7 +125,7 @@ func WriteDynamoItem(nae mmodels.NewAppEntry) {
 }
 
 func checkEmpties(n *mmodels.NewAppEntry) {
-	//check empty values and give them happy defaults
+	//check empty values and give them happy defaults. Keeps dynamodb happy
 	for idx, module := range n.ModulesUsed {
 		if len(module.Description) == 0 {
 			n.ModulesUsed[idx].Description = "No description listed"
@@ -137,6 +137,7 @@ func checkEmpties(n *mmodels.NewAppEntry) {
 }
 
 func sendDynamoItems(itemsInput *dynamodb.BatchWriteItemInput) {
+	//TODO: Add more granular and specific error type checking
 	_, err := DynamoSession.BatchWriteItem(itemsInput)
 	if err != nil {
 		log.Printf("Error writing batch items: %v\n", err.Error())
